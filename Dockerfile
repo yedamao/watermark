@@ -1,4 +1,4 @@
-FROM golang:1.15
+FROM golang:1.17
 
 # Ignore APT warnings about not having a TTY
 ENV DEBIAN_FRONTEND noninteractive
@@ -26,3 +26,8 @@ RUN cd && \
 	make -j$(nproc) && make install && \
 	ldconfig /usr/local/lib
 
+WORKDIR /watermark
+COPY . .
+
+RUN go install
+CMD /go/bin/watermark

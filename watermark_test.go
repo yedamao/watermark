@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_embed(t *testing.T) {
+func Test_addComment(t *testing.T) {
 	// read original image
 
 	blob, err := ioutil.ReadFile("./testing/gopher.png")

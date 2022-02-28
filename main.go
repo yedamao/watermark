@@ -2,14 +2,16 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 
-	"gopkg.in/gographics/imagick.v2/imagick"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
-func getImageBlob(url string) ([]byte, error) {
+func downloadImage(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -24,48 +26,48 @@ func getImageBlob(url string) ([]byte, error) {
 	return blob, nil
 }
 
-func create() {
+func uploadImage() {
+}
 
+type Input struct {
+	Url     string `json:"url"`
+	Comment string `json:"comment"`
+}
+
+func receive(event cloudevents.Event) {
+	input := &Input{}
+	if err := event.DataAs(input); err != nil {
+		fmt.Println("Input parse error: ", err)
+		return
+	}
+	log.Printf("CloudEvent:\n%s", event)
+
+	fmt.Printf("input %s\n", input)
+
+	data, err := downloadImage(input.Url)
+	if err != nil {
+		log.Printf("download image error: \n", err)
+		return
+	}
+
+	processed, err := addComment(data, input.Comment)
+	if err != nil {
+		log.Printf("add comment error: \n", err)
+		return
+	}
+
+	_ = processed
+
+	fmt.Printf("%s processed successfully\n", input.Url)
 }
 
 func main() {
-	imagick.Initialize()
-	// Schedule cleanup
-	defer imagick.Terminate()
-	var err error
-
-	mw := imagick.NewMagickWand()
-
-	err = mw.ReadImage("logo:")
+	// The default client is HTTP.
+	c, err := cloudevents.NewClientHTTP()
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed to create client, %v", err)
 	}
 
-	// Get original logo size
-	width := mw.GetImageWidth()
-	height := mw.GetImageHeight()
-
-	// Calculate half the size
-	hWidth := uint(width / 2)
-	hHeight := uint(height / 2)
-
-	// Resize the image using the Lanczos filter
-	// The blur factor is a float, where > 1 is blurry, < 1 is sharp
-	err = mw.ResizeImage(hWidth, hHeight, imagick.FILTER_LANCZOS, 1)
-	if err != nil {
-		panic(err)
-	}
-
-	// Set the compression quality to 95 (high quality = low compression)
-	err = mw.SetImageCompressionQuality(95)
-	if err != nil {
-		panic(err)
-	}
-
-	out := "/tmp/out.png"
-	if err = mw.WriteImage(out); err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("Wrote: %s\n", out)
+	log.Printf("listening on port %d\n", 8080)
+	log.Fatal(c.StartReceiver(context.Background(), receive))
 }

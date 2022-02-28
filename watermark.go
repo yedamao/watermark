@@ -6,7 +6,7 @@ import (
 	"gopkg.in/gographics/imagick.v2/imagick"
 )
 
-func embed(blob []byte, info string) ([]byte, error) {
+func addComment(blob []byte, info string) ([]byte, error) {
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
 

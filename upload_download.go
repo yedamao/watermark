@@ -28,7 +28,7 @@ func downloadImage(url string) ([]byte, error) {
 	return blob, nil
 }
 
-func uploadImage(data []byte) error {
+func uploadImage(data []byte, format string) error {
 	s, err := session.NewSession(&aws.Config{
 		Region: aws.String(env.S3_REGION),
 		Credentials: credentials.NewStaticCredentials(
@@ -42,7 +42,7 @@ func uploadImage(data []byte) error {
 		return fmt.Errorf("new session: %v", err)
 	}
 
-	fileName := uuid.NewString() + http.DetectContentType(data)
+	fileName := uuid.NewString() + "." + format
 	_, err = s3.New(s).PutObject(&s3.PutObjectInput{
 		Bucket:               aws.String(env.S3_BUCKET),
 		Key:                  aws.String(fileName),

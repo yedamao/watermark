@@ -49,13 +49,13 @@ func receive(event cloudevents.Event) {
 		return
 	}
 
-	processedBlob, err := addComment(data, input.Comment)
+	processedBlob, format, err := addComment(data, input.Comment)
 	if err != nil {
 		log.Printf("add comment error: %v\n", err)
 		return
 	}
 
-	if err := uploadImage(processedBlob); err != nil {
+	if err := uploadImage(processedBlob, format); err != nil {
 		log.Printf("upload image: %v\n", err)
 		return
 	}

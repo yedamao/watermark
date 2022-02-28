@@ -14,7 +14,7 @@ func Test_addComment(t *testing.T) {
 	require.NoError(t, err)
 
 	info := "It's a mark."
-	processed, err := embed(blob, info)
+	processed, err := addComment(blob, info)
 	require.NoError(t, err)
 
 	err = ioutil.WriteFile("./processed.png", processed, 0644)

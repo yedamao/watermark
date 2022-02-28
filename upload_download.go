@@ -43,7 +43,7 @@ func uploadImage(data []byte, format string) error {
 	}
 
 	fileName := uuid.NewString() + "." + format
-	_, err = s3.New(s).PutObject(&s3.PutObjectInput{
+	out, err := s3.New(s).PutObject(&s3.PutObjectInput{
 		Bucket:               aws.String(env.S3_BUCKET),
 		Key:                  aws.String(fileName),
 		ACL:                  aws.String("private"),
@@ -54,6 +54,8 @@ func uploadImage(data []byte, format string) error {
 		ServerSideEncryption: aws.String("AES256"),
 		StorageClass:         aws.String("INTELLIGENT_TIERING"),
 	})
+
+	fmt.Println(out)
 
 	return err
 }
